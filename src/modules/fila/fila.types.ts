@@ -1,0 +1,32 @@
+export type FilaDocumento = {
+  id: string;
+  documentoNumero: string;
+  documentoChave: string;
+  clienteNome: string;
+  qtdItens: number;
+  status: 'pendente' | 'parcial' | 'finalizado' | 'cancelado';
+  consultadoEm: string;
+  tipoDocumento: 'NFE' | 'NFCE';
+  qtdItensEntregues: number;
+};
+
+export type DocumentoConsultado = {
+  documento: string;
+  tipo: 'NFE' | 'NFCE';
+  chaveAcesso: string;
+  cliente: {
+    codigo: string;
+    nome: string;
+    documento: string;
+  };
+  statusAtual: 'pendente' | 'parcial';
+  itens: Array<{
+    id: string;
+    codigoProduto: string;
+    descricao: string;
+    qtdTotal: number;
+    qtdEntregue: number;
+    unidade: string;
+  }>;
+  consultadoEm: string;
+};
