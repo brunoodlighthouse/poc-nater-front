@@ -65,7 +65,7 @@ export function EntregaSuccessScreen({ result, onBackToQueue, onOpenDetail }: Pr
 
         <div className="mt-8 space-y-3">
           <Button variant="primary" size="xl" fullWidth onClick={onBackToQueue}>
-            VOLTAR PARA A FILA
+            NOVA CONSULTA
           </Button>
           <Button variant="secondary" size="lg" fullWidth onClick={onOpenDetail}>
             VER DETALHE DO DOCUMENTO
