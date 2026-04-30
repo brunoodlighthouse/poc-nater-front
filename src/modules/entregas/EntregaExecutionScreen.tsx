@@ -136,7 +136,7 @@ export function EntregaExecutionScreen({ entrega, onBack, onSuccess }: Props) {
       {/* Sticky summary bar */}
       <div className="sticky top-[73px] z-10 border-b border-surface-200 bg-white px-5 py-3">
         <p className="text-center text-base font-semibold text-surface-900">
-          {summary.totalItems} de {entrega.itens.length} itens &bull; {summary.totalUnits} unidades
+          {summary.totalItems} de {entrega.itens.length} itens &bull; {summary.totalUnits}
         </p>
       </div>
 

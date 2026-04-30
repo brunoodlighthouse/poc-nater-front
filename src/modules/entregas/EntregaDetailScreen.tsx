@@ -213,15 +213,15 @@ export function EntregaDetailScreen({ documentoNumero, onBack, onContinue }: Pro
                   </div>
                   <div className="mt-4 grid grid-cols-3 gap-3 text-center">
                     <div className="rounded-2xl bg-white p-3">
-                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Total (unidades)</p>
+                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Total</p>
                       <p className="mt-1 text-xl font-bold text-surface-900">{item.qtdTotal}</p>
                     </div>
                     <div className="rounded-2xl bg-white p-3">
-                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Entregue (unidades)</p>
+                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Entregue</p>
                       <p className="mt-1 text-xl font-bold text-success-600">{item.qtdJaEntregue}</p>
                     </div>
                     <div className="rounded-2xl bg-white p-3">
-                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Pendente (unidades)</p>
+                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Pendente</p>
                       <p className="mt-1 text-xl font-bold text-warning-600">{item.qtdPendente}</p>
                     </div>
                   </div>
