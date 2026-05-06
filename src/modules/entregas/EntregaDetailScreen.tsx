@@ -12,12 +12,14 @@ import type {
   EntregaDetalhe,
   EntregadorOption,
   EntregaHistorico,
+  EntregaHistoricoLog,
 } from './entrega.types';
 
 type Props = {
   documentoNumero: string;
   onBack: () => void;
   onContinue: (entrega: EntregaAtiva) => void;
+  onStarted: () => void;
 };
 
 const historicoStatusLabel: Record<EntregaHistorico['status'], string> = {
@@ -34,7 +36,7 @@ const historicoStatusStyle: Record<EntregaHistorico['status'], string> = {
   cancelada: 'bg-danger-500/15 text-danger-600',
 };
 
-export function EntregaDetailScreen({ documentoNumero, onBack, onContinue }: Props) {
+export function EntregaDetailScreen({ documentoNumero, onBack, onContinue, onStarted }: Props) {
   const logout = useSessaoStore((state) => state.logout);
   const [detail, setDetail] = useState<EntregaDetalhe | null>(null);
   const [couriers, setCouriers] = useState<EntregadorOption[]>([]);
@@ -81,11 +83,11 @@ export function EntregaDetailScreen({ documentoNumero, onBack, onContinue }: Pro
     if (!selectedCourier) return;
     setSubmitting(true);
     try {
-      const data = await apiRequest<EntregaAtiva>('/entregas/iniciar', {
+      await apiRequest<EntregaAtiva>('/entregas/iniciar', {
         method: 'POST',
         body: JSON.stringify({ documento: documentoNumero, entregadorCodigo: selectedCourier }),
       });
-      onContinue(data);
+      onStarted();
     } catch (err) {
       if (err instanceof HttpError) {
         setError({ code: err.code, message: err.message });
@@ -103,11 +105,11 @@ export function EntregaDetailScreen({ documentoNumero, onBack, onContinue }: Pro
     setSubmitting(true);
     try {
       await apiRequest(`/entregas/${detail.entregaEmAndamento.id}/cancelar`, { method: 'POST', body: JSON.stringify({}) });
-      const data = await apiRequest<EntregaAtiva>('/entregas/iniciar', {
+      await apiRequest<EntregaAtiva>('/entregas/iniciar', {
         method: 'POST',
         body: JSON.stringify({ documento: documentoNumero, entregadorCodigo: selectedCourier }),
       });
-      onContinue(data);
+      onStarted();
     } catch (err) {
       if (err instanceof HttpError) {
         setError({ code: err.code, message: err.message });
@@ -189,44 +191,6 @@ export function EntregaDetailScreen({ documentoNumero, onBack, onContinue }: Pro
                   ? 'Reentrega'
                   : 'Entrega inicial'}
             </span>
-          </div>
-        </section>
-
-        {/* Itens */}
-        <section className="rounded-3xl bg-white p-5 shadow-sm">
-          <h2 className="text-xl font-bold text-surface-900">
-            {isReDelivery ? 'Saldo pendente' : 'Itens do documento'}
-          </h2>
-          <p className="mt-1 text-sm text-surface-900/55">
-            {isReDelivery
-              ? 'Somente os itens ainda pendentes aparecem para a reentrega.'
-              : 'Confira os itens antes de iniciar a separacao.'}
-          </p>
-          <div className="mt-4 space-y-3">
-            {detail.itens
-              .filter((item) => !isReDelivery || item.qtdPendente > 0)
-              .map((item) => (
-                <article key={item.id} className="rounded-2xl border border-surface-200 bg-surface-50 p-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-surface-900">{item.descricao}</h3>
-                    <p className="text-sm text-surface-900/55">{item.codigoProduto}</p>
-                  </div>
-                  <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-                    <div className="rounded-2xl bg-white p-3">
-                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Total</p>
-                      <p className="mt-1 text-xl font-bold text-surface-900">{item.qtdTotal}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white p-3">
-                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Entregue</p>
-                      <p className="mt-1 text-xl font-bold text-success-600">{item.qtdJaEntregue}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white p-3">
-                      <p className="text-xs uppercase tracking-[0.12em] text-surface-900/45">Pendente</p>
-                      <p className="mt-1 text-xl font-bold text-warning-600">{item.qtdPendente}</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
           </div>
         </section>
 
@@ -450,6 +414,19 @@ export function EntregaDetailScreen({ documentoNumero, onBack, onContinue }: Pro
                           )}
                         </>
                       )}
+
+                      {entry.alteracoesAdmin?.length > 0 && (
+                        <div className="mt-3 border-t border-surface-200 pt-3">
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-warning-600/70">
+                            Alterado pelo admin
+                          </p>
+                          <div className="space-y-2">
+                            {entry.alteracoesAdmin.map((log) => (
+                              <AdminLogDisplay key={log.id} log={log} />
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </article>
                   );
                 })}
@@ -458,6 +435,68 @@ export function EntregaDetailScreen({ documentoNumero, onBack, onContinue }: Pro
           </section>
         )}
       </main>
+    </div>
+  );
+}
+
+const STATUS_LABEL_MAP: Record<string, string> = {
+  em_andamento: 'Em andamento',
+  finalizada_total: 'Finalizada total',
+  finalizada_parcial: 'Finalizada parcial',
+  cancelada: 'Cancelada',
+};
+
+type DadosSnapshot = {
+  status?: string;
+  itens?: Array<{ itemIdProtheus: string; qtdEntregue: number }>;
+};
+
+function parseDados(raw: unknown): DadosSnapshot | null {
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    return raw as DadosSnapshot;
+  }
+  return null;
+}
+
+function describeChanges(log: EntregaHistoricoLog): string[] {
+  const antes = parseDados(log.dadosAntes);
+  const depois = parseDados(log.dadosDepois);
+  const changes: string[] = [];
+
+  if (antes?.status && depois?.status && antes.status !== depois.status) {
+    changes.push(
+      `Status: ${STATUS_LABEL_MAP[antes.status] ?? antes.status} → ${STATUS_LABEL_MAP[depois.status] ?? depois.status}`,
+    );
+  }
+
+  if (antes?.itens && depois?.itens) {
+    const antesMap = new Map(antes.itens.map((i) => [i.itemIdProtheus, i.qtdEntregue]));
+    for (const item of depois.itens) {
+      const qtdAntes = antesMap.get(item.itemIdProtheus);
+      if (qtdAntes !== undefined && qtdAntes !== item.qtdEntregue) {
+        changes.push(`Item ${item.itemIdProtheus}: ${qtdAntes} → ${item.qtdEntregue}`);
+      }
+    }
+  }
+
+  if (changes.length === 0) {
+    changes.push(log.acao === 'editar_status' ? 'Status alterado' : 'Quantidades alteradas');
+  }
+
+  return changes;
+}
+
+function AdminLogDisplay({ log }: { log: EntregaHistoricoLog }) {
+  const changes = describeChanges(log);
+
+  return (
+    <div className="rounded-lg bg-warning-400/10 px-3 py-2">
+      {changes.map((change, i) => (
+        <p key={i} className="text-sm text-warning-800">{change}</p>
+      ))}
+      <p className="mt-1 text-xs text-surface-900/50">
+        Motivo: {log.motivo} — {format(new Date(log.realizadaEm), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+      </p>
     </div>
   );
 }

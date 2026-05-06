@@ -6,6 +6,7 @@ import { EntregaDetailScreen } from '@/modules/entregas/EntregaDetailScreen';
 import { EntregaExecutionScreen } from '@/modules/entregas/EntregaExecutionScreen';
 import { EntregaSuccessScreen } from '@/modules/entregas/EntregaSuccessScreen';
 import { ScreenTransition } from '@/components/ScreenTransition';
+import { AdminApp } from '@/modules/admin/AdminApp';
 import type { EntregaAtiva, FinalizarEntregaResponse } from '@/modules/entregas/entrega.types';
 
 type AppView =
@@ -14,7 +15,11 @@ type AppView =
   | { name: 'execucao'; entrega: EntregaAtiva }
   | { name: 'sucesso'; result: FinalizarEntregaResponse };
 
-export function App() {
+function isAdminPath(): boolean {
+  return window.location.pathname.startsWith('/admin');
+}
+
+function OperadorApp() {
   const token = useSessaoStore((s) => s.token);
   const [view, setView] = useState<AppView>({ name: 'fila' });
 
@@ -26,6 +31,7 @@ export function App() {
             documentoNumero={view.documentoNumero}
             onBack={() => setView({ name: 'fila' })}
             onContinue={(entrega) => setView({ name: 'execucao', entrega })}
+            onStarted={() => setView({ name: 'fila' })}
           />
         );
       case 'execucao':
@@ -62,4 +68,12 @@ export function App() {
       )}
     </div>
   );
+}
+
+export function App() {
+  if (isAdminPath()) {
+    return <AdminApp />;
+  }
+
+  return <OperadorApp />;
 }

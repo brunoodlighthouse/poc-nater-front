@@ -16,6 +16,15 @@ export type EntregaItemDetalhe = {
   qtdPendente: number;
 };
 
+export type EntregaHistoricoLog = {
+  id: string;
+  acao: string;
+  motivo: string;
+  dadosAntes: unknown;
+  dadosDepois: unknown;
+  realizadaEm: string;
+};
+
 export type EntregaHistorico = {
   id: string;
   status: 'em_andamento' | 'finalizada_total' | 'finalizada_parcial' | 'cancelada';
@@ -31,6 +40,7 @@ export type EntregaHistorico = {
     qtdTotal: number;
     qtdEntregue: number;
   }>;
+  alteracoesAdmin: EntregaHistoricoLog[];
 };
 
 export type EntregaAtiva = {

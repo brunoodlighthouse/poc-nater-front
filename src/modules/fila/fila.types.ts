@@ -4,7 +4,7 @@ export type FilaDocumento = {
   documentoChave: string;
   clienteNome: string;
   qtdItens: number;
-  status: 'pendente' | 'parcial' | 'finalizado' | 'cancelado';
+  status: 'pendente' | 'em_andamento' | 'parcial' | 'finalizado' | 'cancelado';
   consultadoEm: string;
   tipoDocumento: 'NFE' | 'NFCE';
   qtdItensEntregues: number;

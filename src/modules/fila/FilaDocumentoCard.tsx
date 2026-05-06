@@ -9,6 +9,7 @@ type Props = {
 
 const statusConfig: Record<FilaDocumento['status'], { label: string; className: string }> = {
   pendente: { label: 'Pendente', className: 'bg-warning-400/15 text-warning-600' },
+  em_andamento: { label: 'Em andamento', className: 'bg-brand-500/15 text-brand-600' },
   parcial: { label: 'Parcial', className: 'bg-info-400/15 text-info-600' },
   finalizado: { label: 'Finalizado', className: 'bg-success-400/15 text-success-600' },
   cancelado: { label: 'Cancelado', className: 'bg-danger-400/15 text-danger-600' },
