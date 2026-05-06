@@ -25,7 +25,7 @@ const STATUS_OPTIONS = [
 ];
 
 const SORT_OPTIONS = [
-  { value: 'consultadoEm', label: 'Data consulta' },
+  { value: 'recebidoEm', label: 'Data recebimento' },
   { value: 'documentoNumero', label: 'Documento' },
   { value: 'clienteNome', label: 'Cliente' },
   { value: 'status', label: 'Status' },
@@ -69,7 +69,7 @@ export function AdminDocumentosScreen({ onOpenDocument }: Props) {
     perPage: 20,
     status: '',
     search: '',
-    sortBy: 'consultadoEm',
+    sortBy: 'recebidoEm',
     sortOrder: 'desc',
   });
   const [searchInput, setSearchInput] = useState('');
