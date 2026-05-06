@@ -7,8 +7,7 @@ import { useSessaoStore } from '@/stores/sessao.store';
 import { NovaConsultaPanel } from './NovaLeituraPanel';
 import { FilaDocumentoCard } from './FilaDocumentoCard';
 import { NotaRecebidaCard } from './NotaRecebidaCard';
-import type { DocumentoConsultado, FilaDocumento } from './fila.types';
-import type { NotaRecebida } from './nota-recebida.types';
+import type { DocumentoConsultado, FilaDocumento, NotaRecebida } from './fila.types';
 
 type Tab = 'documentos' | 'notas';
 
@@ -44,7 +43,7 @@ export function FilaScreen({ onOpenDocument }: Props) {
   async function loadDocumentos() {
     setLoadingDocumentos(true);
     try {
-      const data = await apiRequest<FilaDocumento[]>('/fila');
+      const data = await apiRequest<FilaDocumento[]>('/documentos');
       setDocumentos(data);
     } catch {
       // silently fail - list will be empty
@@ -56,7 +55,7 @@ export function FilaScreen({ onOpenDocument }: Props) {
   async function loadNotas() {
     setLoadingNotas(true);
     try {
-      const data = await apiRequest<NotaRecebida[]>('/notas-recebidas');
+      const data = await apiRequest<NotaRecebida[]>('/documentos/notas-hoje');
       setNotas(data);
     } catch {
       // silently fail

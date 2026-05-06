@@ -1,17 +1,25 @@
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import type { NotaRecebida } from './nota-recebida.types';
+import type { NotaRecebida } from './fila.types';
 
 type Props = {
   nota: NotaRecebida;
   onClick?: () => void;
 };
 
+const statusConfig: Record<NotaRecebida['status'], { label: string; className: string }> = {
+  pendente: { label: 'Pendente', className: 'bg-warning-400/15 text-warning-600' },
+  em_andamento: { label: 'Em andamento', className: 'bg-brand-500/15 text-brand-600' },
+  parcial: { label: 'Parcial', className: 'bg-info-400/15 text-info-600' },
+  finalizado: { label: 'Finalizado', className: 'bg-success-400/15 text-success-600' },
+  cancelado: { label: 'Cancelado', className: 'bg-danger-400/15 text-danger-600' },
+};
+
 export function NotaRecebidaCard({ nota, onClick }: Props) {
-  const valorFormatado = nota.valorTotal.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
+  const valorFormatado = nota.valorTotal > 0
+    ? nota.valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+    : null;
+  const status = statusConfig[nota.status];
 
   return (
     <button
@@ -32,9 +40,16 @@ export function NotaRecebidaCard({ nota, onClick }: Props) {
             {nota.qtdItens} {nota.qtdItens === 1 ? 'item' : 'itens'}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-brand-500/10 px-3 py-1 text-sm font-semibold text-brand-600">
-          {valorFormatado}
-        </span>
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          <span className={`rounded-full px-3 py-1 text-sm font-semibold ${status.className}`}>
+            {status.label}
+          </span>
+          {valorFormatado && (
+            <span className="text-sm font-semibold text-surface-900/60">
+              {valorFormatado}
+            </span>
+          )}
+        </div>
       </div>
       <p className="mt-4 text-sm text-surface-900/40">
         Recebida ha{' '}
